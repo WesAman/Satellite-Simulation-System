@@ -1,13 +1,9 @@
+
+Project originally Forked from satvis.space, check them out here.
 # [satvis.space](https://satvis.space) ![Node CI](https://github.com/Flowm/satvis/workflows/Node%20CI/badge.svg)
 
-Satellite orbit visualization and pass prediction.
-
-> [!NOTE]
-> The `next` branch contains many improvements from a bigger refactoring and is the recommended branch currently.
-> This version is currently deployed to https://satvis.space/next.
-> Planning to merge this back to the ~~master~~ main in the next few months.
-
-![Screenshot](https://user-images.githubusercontent.com/1117666/47623704-f0c3e900-db14-11e8-9cf9-7bf13acb267c.png)
+Satellite orbit visualization and pass prediction, I got even more curious when studying orbital mechanics on my own time and was curious how a starlink satellite would
+communicate with nearby satellites incase of any issues would arise. One helpful thing for a satellite tracking app would be to track a single satellite and detect NEARBY satellites.
 
 ## Features
 - Calculate position and orbit of satellites from TLE
@@ -16,6 +12,7 @@ Satellite orbit visualization and pass prediction.
 - Local browser notifications for passes
 - Serverless architecture
 - Works offline as Progressive Web App (PWA)
+- *Added:* Nearby Satellite Tracking
 
 ## Built With
 - [CesiumJS](https://cesiumjs.org)
@@ -37,13 +34,7 @@ npm clean-install
 - `npm run build` to build the application (output in `dist` folder)
 - `npm run serve` to build the application and serve with static webserver
 - `npm run update-tle` to retrieve the latest satellite TLEs from NORAD
-
-## iOS App
-To provide pass notifications on iOS where local browser notifications are [not
-supported](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API#Browser_compatibility)
-a simple app wraps the webview and handles the scheduling of
-[UserNotifications](https://developer.apple.com/documentation/usernotifications).
-
+- 
 <p align="center"><a href="https://apps.apple.com/app/satvis/id1441084766"><img src="src/assets/app-store-badge.svg" width="250" /></a></p>
 
 ## License
