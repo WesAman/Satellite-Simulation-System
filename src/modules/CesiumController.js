@@ -544,4 +544,24 @@ export class CesiumController {
       }
     });
   }
+
+
+  visualizeNearbySatellites(selectedSatellite) {
+    const nearbySatellites = this.sats.detectNearbySatellites(selectedSatellite);
+
+    nearbySatellites.forEach((satellite) => {
+      const polyline = new Cesium.PolylineGraphics({
+        positions: Cesium.Cartesian3.fromDegreesArray([
+          selectedSatellite.orbit.longitude, selectedSatellite.orbit.latitude,
+          satellite.orbit.longitude, satellite.orbit.latitude,
+        ]),
+        width: 5,
+        material: Cesium.Color.YELLOW
+      });
+
+      this.viewer.entities.add({ polyline });
+    });
+  }
+
+  
 }

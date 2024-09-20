@@ -10,6 +10,8 @@ import satvisIcon from "../assets/android-chrome-192x192.png";
 import { CesiumCallbackHelper } from "./util/CesiumCallbackHelper";
 
 export class SatelliteProperties {
+
+  
   constructor(tle, tags = []) {
     this.name = tle.split("\n")[0].trim();
     if (tle.startsWith("0 ")) {
@@ -27,6 +29,7 @@ export class SatelliteProperties {
       icon: satvisIcon,
     });
   }
+  
 
   hasTag(tag) {
     return this.tags.includes(tag);
@@ -290,6 +293,7 @@ export class SatelliteProperties {
     });
     toast.success(`Notifying for ${passes.length} passes of ${this.name}`);
   }
+  
 
   get swath() {
     // Hardcoded swath for certain satellites
@@ -307,4 +311,20 @@ export class SatelliteProperties {
     }
     return 200;
   }
+
+
+  communicateWith(satellite) {
+    console.log(`Communicating with satellite ${satellite.name}`);
+
+    // Simulate data exchange
+    // You could add more complex logic to simulate message passing, latency, etc.
+    this.data = `Data from ${this.name} to ${satellite.name}`;
+    satellite.receiveData(this.data);
+  }
+
+  receiveData(data) {
+    console.log(`${this.name} received data: ${data}`);
+  }
+
+  
 }

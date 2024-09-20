@@ -371,6 +371,7 @@ export class SatelliteComponentCollection extends CesiumComponentCollection {
     this.createCesiumSatelliteEntity("Ground station link", "polyline", polyline);
   }
 
+  
   set groundStation(position) {
     // No groundstation calculation for GEO satellites
     if (this.props.orbit.orbitalPeriod > 60 * 12) {
