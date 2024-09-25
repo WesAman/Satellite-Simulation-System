@@ -1,0 +1,9 @@
+/node_modules/
+/dist/
+size-plugin.json
+
+cypress/screenshots/
+cypress/videos/
+cypress/fixtures/
+cypress/support/
+report/
