@@ -97,7 +97,7 @@ computeGeodeticDistanceFromTLE(tle1, tle2, currentTime) {
   const pos2 = this.getGeodeticFromTLE(tle2, now);
 
   if (!pos1 || !pos2) {
-    console.error('Failed to compute satellite geodetic positions from TLEs');
+    // console.error('Failed to compute satellite geodetic positions from TLEs pos1: ', pos1,' pos2: ', pos2);
     return Infinity;
   }
 
