@@ -1,5 +1,6 @@
 import { SatelliteComponentCollection } from "./SatelliteComponentCollection";
 import { GroundStationEntity } from "./GroundStationEntity";
+import * as Cesium from "@cesium/engine";
 
 import { useSatStore } from "../stores/sat";
 import { CesiumCleanupHelper } from "./util/CesiumCleanupHelper";
@@ -27,29 +28,69 @@ export class SatelliteManager {
     });
   }
 
-detectNearbySatellites(selectedSatellite, thresholdDistance = 250) {
-  const nearbySatellites = [];
-  const selectedTle = selectedSatellite.props.orbit.tle;
-
-  this.satellites.forEach((sat) => {
-    if (sat !== selectedSatellite) {
-      const satelliteTle = sat.props.orbit.tle;
-      const distance = this.computeGeodeticDistanceFromTLE(selectedTle, satelliteTle);  // Compute distance using geodetic coordinates
-
-      if (distance < thresholdDistance) {
-        nearbySatellites.push(sat);
-        // this.communicateWith(sat);
-        console.log(`Nearby satellite detected: ${sat.props.name} at distance ${distance.toFixed(2)} km`);
+  detectNearbySatellites(selectedSatellite, thresholdDistance = 250) {
+    const nearbySatellites = [];
+    const selectedTle = selectedSatellite.props.orbit.tle;
+    const currentTime = Cesium.JulianDate.toDate(this.viewer.clock.currentTime); // Get Cesium's current time
+  
+    this.satellites.forEach((sat) => {
+      if (sat !== selectedSatellite) {
+        const satelliteTle = sat.props.orbit.tle;
+  
+        // Pass currentTime to computeGeodeticDistanceFromTLE
+        const distance = this.computeGeodeticDistanceFromTLE(selectedTle, satelliteTle, currentTime);  
+  
+        if (distance < thresholdDistance) {
+          nearbySatellites.push(sat);
+          console.log(`Nearby satellite detected: ${sat.props.name} at distance ${distance.toFixed(2)} km`);
+        }
       }
-    }
-  });
+    });
+  
+    return nearbySatellites;
+  }
+  
+// detectNearbySatellites(selectedSatellite, thresholdDistance = 250) {
+//   const nearbySatellites = [];
+//   const selectedTle = selectedSatellite.props.orbit.tle;
 
-  return nearbySatellites;
+//   this.satellites.forEach((sat) => {
+//     if (sat !== selectedSatellite) {
+//       const satelliteTle = sat.props.orbit.tle;
+//       const distance = this.computeGeodeticDistanceFromTLE(selectedTle, satelliteTle);  // Compute distance using geodetic coordinates
+
+//       if (distance < thresholdDistance) {
+//         nearbySatellites.push(sat);
+//         // this.communicateWith(sat);
+//         console.log(`Nearby satellite detected: ${sat.props.name} at distance ${distance.toFixed(2)} km`);
+//       }
+//     }
+//   });
+
+//   return nearbySatellites;
+// }
+
+// Main method to track the closest satellite
+trackNearbySatellites(selectedSatellite) {
+  const nearbySatellites = this.detectNearbySatellites(selectedSatellite, 250);  // 250 km threshold
+  nearbySatellites.forEach((satellite) => {
+    this.trackSatellite(satellite);  // Track the nearby satellites
+  });
 }
 
-// Compute geodetic distance between two satellites
-computeGeodeticDistanceFromTLE(tle1, tle2) {
-  const now = new Date();
+// Track a nearby satellite (this function assumes you already have a track() function for satellites)
+trackSatellite(satellite) {
+  console.log('lol where am i using this')
+  console.log(satellite.track());
+
+  // console.log(Tracking nearby satellite: ${satellite.props.name});
+}
+
+
+
+computeGeodeticDistanceFromTLE(tle1, tle2, currentTime) {
+  // Use the passed-in currentTime
+  const now = currentTime || new Date();
 
   // Get geodetic positions for both satellites
   const pos1 = this.getGeodeticFromTLE(tle1, now);
@@ -62,13 +103,28 @@ computeGeodeticDistanceFromTLE(tle1, tle2) {
 
   // Compute the Haversine distance between two points (lat, long, alt)
   return this.haversineDistance(pos1, pos2);
-
 }
 
 
 
+// // Compute geodetic distance between two satellites
+// computeGeodeticDistanceFromTLE(tle1, tle2) {
+//   const now = new Date();
 
-// Convert ECI to Geodetic (latitude, longitude, altitude)
+//   // Get geodetic positions for both satellites
+//   const pos1 = this.getGeodeticFromTLE(tle1, now);
+//   const pos2 = this.getGeodeticFromTLE(tle2, now);
+
+//   if (!pos1 || !pos2) {
+//     // console.error('Failed to compute satellite geodetic positions from TLEs');
+//     return Infinity;
+//   }
+
+//   // Compute the Haversine distance between two points (lat, long, alt)
+//   return this.haversineDistance(pos1, pos2);
+
+// }
+
 getGeodeticFromTLE(tle, time) {
   const satrec = satellite.twoline2satrec(tle[1], tle[2]);
   const positionAndVelocity = satellite.propagate(satrec, time);
@@ -89,6 +145,25 @@ getGeodeticFromTLE(tle, time) {
 }
 
 
+// // Convert ECI to Geodetic (latitude, longitude, altitude)
+// getGeodeticFromTLE(tle, time) {
+//   const satrec = satellite.twoline2satrec(tle[1], tle[2]);
+//   const positionAndVelocity = satellite.propagate(satrec, time);
+//   const positionEci = positionAndVelocity.position;
+
+//   if (!positionEci) {
+//     return null;
+//   }
+
+//   const gmst = satellite.gstime(time);
+//   const positionGd = satellite.eciToGeodetic(positionEci, gmst);
+
+//   const latitude = satellite.degreesLat(positionGd.latitude);
+//   const longitude = satellite.degreesLong(positionGd.longitude);
+//   const altitude = positionGd.height / 1000;  // Convert to km
+
+//   return { latitude, longitude, altitude };
+// }
 
 
  // Use satellite.js to propagate position from TLE data
@@ -107,22 +182,6 @@ getGeodeticFromTLE(tle, time) {
     y: positionEci.y,
     z: positionEci.z
   };
-}
-
-
-// Track a nearby satellite (this function assumes you already have a track() function for satellites)
-trackSatellite(satellite) {
-  console.log(satellite.track());
-
-  // console.log(Tracking nearby satellite: ${satellite.props.name});
-}
-
-// Main method to track the closest satellite
-trackNearbySatellites(selectedSatellite) {
-  const nearbySatellites = this.detectNearbySatellites(selectedSatellite, 250);  // 250 km threshold
-  nearbySatellites.forEach((satellite) => {
-    this.trackSatellite(satellite);  // Track the nearby satellites
-  });
 }
 
 
@@ -162,21 +221,6 @@ degToRad(deg) {
   return deg * (Math.PI / 180);
 }
 
-// Main method to track the closest satellites
-trackNearbySatellites(selectedSatellite) {
-  const nearbySatellites = this.detectNearbySatellites(selectedSatellite, 250);  // 250 km threshold
-  nearbySatellites.forEach((satellite) => {
-    this.trackSatellite(satellite);  // Track the nearby satellites
-  });
-}
-
-// Basic satellite tracking function (replace as needed)
-trackSatellite(satellite) {
-  console.log(`Tracking satellite: ${satellite.props.name}`);
-}
-
-
-  
 
   addFromTleUrls(urlTagList) {
     // Initiate async download of all TLE URLs and update store afterwards
@@ -298,22 +342,15 @@ trackSatellite(satellite) {
         console.log("Satellite Info:", satelliteInfo);
 
         // Call detectNearbySatellites method correctly
-        this.detectNearbySatellites(selectedSatellite, 250);  // 250 km threshold   check
-        //check
-        selectedSatellite.track();
-        this.pendingTrackedSatellite = undefined;
-        console.log("'we're tracking nearby satellites");
+        this.detectNearbySatellites(selectedSatellite, 250);  // 250 km threshold
     } else {
         this.pendingTrackedSatellite = name;
     }
-
-    const nearbySatellites = this.detectNearbySatellites(selectedSatellite);
-
-    nearbySatellites.forEach((nearbySatellite) => {
-        // console.log(`Nearby satellite detected:', ${nearbySatellite.props.name}`);
-        this.trackSatellite(nearbySatellite); 
-        // console.log(nearbySatellite)
-    });
+    // nearbySatellites.forEach((nearbySatellite) => {
+    //     // console.log(`Nearby satellite detected:', ${nearbySatellite.props.name}`);
+    //     this.trackSatellite(nearbySatellite); 
+    //     // console.log(nearbySatellite)
+   // });
 }
 
   // Method to retrieve a satellite by its name
