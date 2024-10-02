@@ -145,27 +145,6 @@ getGeodeticFromTLE(tle, time) {
 }
 
 
-// // Convert ECI to Geodetic (latitude, longitude, altitude)
-// getGeodeticFromTLE(tle, time) {
-//   const satrec = satellite.twoline2satrec(tle[1], tle[2]);
-//   const positionAndVelocity = satellite.propagate(satrec, time);
-//   const positionEci = positionAndVelocity.position;
-
-//   if (!positionEci) {
-//     return null;
-//   }
-
-//   const gmst = satellite.gstime(time);
-//   const positionGd = satellite.eciToGeodetic(positionEci, gmst);
-
-//   const latitude = satellite.degreesLat(positionGd.latitude);
-//   const longitude = satellite.degreesLong(positionGd.longitude);
-//   const altitude = positionGd.height / 1000;  // Convert to km
-
-//   return { latitude, longitude, altitude };
-// }
-
-
  // Use satellite.js to propagate position from TLE data
  getPositionFromTLE(tle, time) {
   const satrec = satellite.twoline2satrec(tle[1], tle[2]);  // Parse the TLE data
